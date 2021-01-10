@@ -150,6 +150,14 @@ ScaleContinuousColourspec <- ggproto(
                      spectrum_limits = self$get_spectrum_limits()) {
     self$rescaler(x, to = spectrum_limits, from = range)
   },
+  transform = function(self, x) {
+    fun <- ggproto_parent(ScaleContinuous, self)$transform
+    if (inherits(x, "colour_spec")) {
+      field_apply(x, fun)
+    } else {
+      fun(x)
+    }
+  },
   get_spectrum_limits = function(self) {
     self$spectrum_limits
   },
@@ -187,7 +195,6 @@ substitute_na.colour_spec <- function(x, from) {
       field(x, fieldname) <- substitute_na(field(x, fieldname),
                                            field(from, fieldname))
     }
-
   }
   return(x)
 }

@@ -49,6 +49,14 @@ seq_ncol <- function(dat) {
   seq_len(NCOL(dat))
 }
 
+field_apply <- function(X, FUN, ...) {
+  fieldnames <- fields(X)
+  for (fname in fieldnames) {
+    field(X, fname) <- FUN(field(X, fname), ...)
+  }
+  return(X)
+}
+
 # ggplot internals --------------------------------------------------------
 
 # Function for grabbing internal function of ggplot2 that are also used here
