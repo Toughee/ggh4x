@@ -105,7 +105,6 @@ stat_midpoint <- function(...,
 #' @format NULL
 #' @export
 #' @rdname ggh4x_extensions
-#' @importFrom vctrs vec_recycle_common
 StatFunxy <- ggproto(
   "StatFunxy", Stat,
   required_aes = c("x", "y"),
