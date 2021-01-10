@@ -7,6 +7,7 @@
 #' @import scales
 #' @import grid
 #' @import gtable
+#' @import vctrs
 NULL
 
 # The following block is used by usethis to automatically manage

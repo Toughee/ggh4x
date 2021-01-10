@@ -34,7 +34,8 @@ Suggests:
     rmarkdown,
     stats,
     testthat (>= 2.1.0),
-    utils
+    utils,
+    farver
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
@@ -59,14 +60,17 @@ Collate:
     'guide_axis_utils.R'
     'guide_dendrogram.R'
     'guide_stringlegend.R'
+    'palettes.R'
     'position_disjoint_ranges.R'
     'position_lineartrans.R'
     'scale_dendrogram.R'
     'scale_listed.R'
     'scale_multi.R'
+    'scale_rgb.R'
     'stat_funxy.R'
     'stat_rle.R'
     'stat_roll.R'
     'stat_theodensity.R'
     'themes.R'
     'utils.R'
+    'vctrs_colour_spec.R'

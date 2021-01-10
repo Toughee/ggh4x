@@ -21,6 +21,7 @@
   formulas (#25).
 * Added option to discard dendrogram labels (#23).
 * Added coloured text legend (stringlegend, #31).
+* Added geom_aimed_text() for rotated text.
 
 # ggh4x 0.1.0
 
