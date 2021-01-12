@@ -77,7 +77,34 @@ format.colour_spec <- function(x, ...) {
 vec_math.colour_spec <- function(.fn, .x, ...) {
   switch(.fn,
          is.finite = rowSums(!is.finite(as.matrix(.x))) > 0,
+         is.infinite = rowSums(is.infinite(as.matrix(.x))) > 0,
          vec_math_base(.fn, .x, ...))
+}
+
+#' @export
+#' @method vec_arith colour_spec
+vec_arith.colour_spec <- function(op, x, y, ...) {
+  UseMethod("vec_arith.colour_spec", y)
+}
+
+#' @export
+#' @method vec_arith.colour_spec default
+vec_arith.colour_spec.default <- function(op, x, y, ...) {
+  stop_incompatible_op(op, x, y)
+}
+
+#' @export
+#' @method vec_arith.colour_spec colour_spec
+vec_arith.colour_spec.colour_spec <- function(op, x, y, ...) {
+  xfields <- fields(x)
+  if (!all(xfields == fields(y))) {
+    stop_incompatible_op(op, x, y, details = "colourspaces are not the same")
+  }
+  new <- vec_init_along(x)
+  for (f in xfields) {
+    field(new, f) <- vec_arith_base(op, field(x, f), field(y, f))
+  }
+  return(new)
 }
 
 #' @export
@@ -109,3 +136,6 @@ as.matrix.colour_spec <- function(x, ...) {
   as.matrix(vec_data(x))
 }
 
+is_colour_spec <- function(x) {
+  inherits(x, "colour_spec")
+}

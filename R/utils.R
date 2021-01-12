@@ -49,12 +49,34 @@ seq_ncol <- function(dat) {
   seq_len(NCOL(dat))
 }
 
-field_apply <- function(X, FUN, ...) {
-  fieldnames <- fields(X)
-  for (fname in fieldnames) {
-    field(X, fname) <- FUN(field(X, fname), ...)
+# Vctrs utilities
+
+# Output matches max length of whatever FUN(X, ...) outputs, fill rest with NAs
+field_lapply <- function(X, FUN, ...) {
+  if (inherits(X, "vctrs_rcrd")) {
+    Y <- lapply(vec_data(X), FUN, ...)
+    lens <- lengths(Y)
+    out  <- vec_init(X, max(lens))
+    for (fname in names(Y)) {
+      field(out, fname) <- c(Y[[fname]], rep(NA, max(lens) - lens[[fname]]))
+    }
+    return(out)
+  } else {
+    lapply(X, FUN, ...)
   }
-  return(X)
+}
+
+# Output same length as input
+field_apply <- function(X, FUN, ...) {
+  if (inherits(x, "vctrs_rcrd")) {
+    fieldnames <- fields(X)
+    for (fname in fieldnames) {
+      field(X, fname) <- FUN(field(X, fname), ...)
+    }
+    return(X)
+  } else {
+    FUN(X, ...)
+  }
 }
 
 # ggplot internals --------------------------------------------------------
