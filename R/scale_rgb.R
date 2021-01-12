@@ -53,7 +53,7 @@ scale_colour_rgb <- function(..., na.value = "grey50", guide = "none",
   )
   scale$range <- colourspec_range()
   scale$spectrum_limits <- validate_spectrum_limits(spectrum_limits, rgb_spec())
-  scale$ptype <- rgb_spec()
+  scale$ptype <- new_rgb_spec
   scale
 }
 
@@ -69,7 +69,7 @@ scale_fill_rgb <- function(..., na.value = "grey50", guide = "none",
   )
   scale$range <- colourspec_range()
   scale$spectrum_limits <- validate_spectrum_limits(spectrum_limits, rgb_spec())
-  scale$ptype <- rgb_spec()
+  scale$ptype <- new_rgb_spec
   scale
 }
 
@@ -125,7 +125,7 @@ ScaleContinuousColourspec <- ggproto(
   },
   get_limits = function(self) {
     if (self$is_empty()) {
-      return(vec_cast(c(0, 1), self$ptype))
+      return(vec_cast(c(0, 1), self$ptype()))
     }
     if (is.null(self$limits)) {
       self$range$range
