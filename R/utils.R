@@ -51,6 +51,8 @@ seq_ncol <- function(dat) {
 
 # Vctrs utilities
 
+
+
 # Output matches max length of whatever FUN(X, ...) outputs, fill rest with NAs
 field_lapply <- function(X, FUN, ...) {
   if (inherits(X, "vctrs_rcrd")) {
@@ -68,7 +70,7 @@ field_lapply <- function(X, FUN, ...) {
 
 # Output same length as input
 field_apply <- function(X, FUN, ...) {
-  if (inherits(x, "vctrs_rcrd")) {
+  if (inherits(X, "vctrs_rcrd")) {
     fieldnames <- fields(X)
     for (fname in fieldnames) {
       field(X, fname) <- FUN(field(X, fname), ...)
@@ -77,6 +79,37 @@ field_apply <- function(X, FUN, ...) {
   } else {
     FUN(X, ...)
   }
+}
+
+# Input [1 2; 3 4; 5 6]
+# Outputs like this:
+# 1  NA NA
+# 2  NA NA
+# NA 3  NA
+# NA 4  NA
+# NA NA 5
+# NA NA 6
+decompose_fields <- function(X, FUN, ...) {
+  if (!inherits(X, "vctrs_rcrd")) {
+    rlang::abort("Not vctrs_rcrd")
+  }
+  tmp <- lapply(vec_data(X), FUN, ...)
+  lens <- lengths(tmp)
+  start <- {end <- cumsum(lens)} - lens + 1
+  out <- vec_init(X, n = sum(lens))
+  for (f in fields(X)) {
+    field(out, f)[start[f]:end[f]] <- tmp[[f]]
+  }
+  return(out)
+}
+
+flatten_fields <- function(X, FUN, ...) {
+  if (!inherits(X, "vctrs_rcrd")) {
+    rlang::abort("Not vctrs_rcrd")
+  }
+  out <- vec_c(!!!unname(vec_data(X)))
+  dim(out) <- c(length(X), length(fields(X)))
+  apply(out, 1, FUN, ...)
 }
 
 # ggplot internals --------------------------------------------------------
