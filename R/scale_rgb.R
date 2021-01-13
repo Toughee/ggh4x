@@ -43,7 +43,7 @@
 #' p + scale_colour_rgb(
 #'   spectrum_limits = rgb_spec(c(0, 0), c(0, 1), c(0.25, 0.75))
 #' )
-scale_colour_rgb <- function(..., na.value = "grey50", guide = "none",
+scale_colour_rgb <- function(..., na.value = "grey50", guide = "colourcube",
                              limits = NULL, spectrum_limits = NULL,
                              aesthetics = "colour") {
   scale <- continuous_scale(

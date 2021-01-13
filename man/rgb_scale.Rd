@@ -9,7 +9,7 @@
 scale_colour_rgb(
   ...,
   na.value = "grey50",
-  guide = "none",
+  guide = "colourcube",
   limits = NULL,
   spectrum_limits = NULL,
   aesthetics = "colour"
