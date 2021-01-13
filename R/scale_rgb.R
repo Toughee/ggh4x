@@ -137,6 +137,105 @@ ScaleContinuousColourspec <- ggproto(
       substitute_na(self$limits, self$range$range)
     }
   },
+  get_breaks = function(self, limits = self$get_limits()) {
+    if (self$is_empty()) {
+      return(numeric())
+    }
+    if (is.null(self$breaks)) {
+      return(NULL)
+    }
+    if (!is.list(self$breaks) && is.na(self$breaks)) {
+      rlang::abort("Invalid breaks specification. Use `NULL`, not `NA`.")
+    }
+
+    limits <- field_apply(limits, self$trans$inverse)
+
+    zero_check <- if (is_colour_spec(limits)) {
+      all(vapply(vec_data(limits), zero_range, logical(1)))
+    } else {
+      zero_range(limits)
+    }
+
+    if (zero_check) {
+      breaks <- limits[1]
+    } else if (inherits(self$breaks, "waiver")) {
+      # Protect limits against lapply if not colourspec
+      limits <- if (is_colour_spec(limits)) limits else list(limits)
+      # Calculate breaks for every field
+      if (!is.null(self$n.breaks) && "n" %in% names(formals(trans$breaks))) {
+        breaks <- field_lapply(limits, self$trans$breaks, n = self$n.breaks)
+      } else {
+        if (!is.null(self$n.breaks)) {
+          rlang::warn(paste0("Ignoring n.breaks. Use a trans ",
+                             "object that supports setting number of breaks"))
+        }
+        breaks <- field_lapply(limits, self$trans$breaks)
+      }
+    } else if (is.function(self$breaks)) {
+      breaks <- field_lapply(limits, self$breaks)
+    } else {
+      breaks <- self$breaks
+    }
+    limits <- field_apply(limits, self$trans$transform)
+    breaks <- field_apply(breaks, self$trans$transform)
+    if (is_colour_spec(breaks)) {
+      for (f in fields(breaks)) {
+        field(breaks, f) <- censor(field(breaks, f), field(limits, f),
+                                   only.finite = FALSE)
+      }
+    } else {
+      breaks <- censor(breaks, limits, only.finite = FALSE)
+    }
+
+    breaks
+  },
+  get_labels = function(self, breaks = self$get_breaks()) {
+
+    if (is.null(breaks)) {
+      return(NULL)
+    }
+
+    if (is.null(self$labels)) {
+      return(NULL)
+    }
+
+    if (!is.list(self$labels) && is.na(self$labels)) {
+      rlang::abort("Invalid label specification. Use `NULL`, not `NA`.")
+    }
+
+    breaks <- field_apply(breaks, self$trans$inverse)
+
+    if (inherits(self$labels, "waiver")) {
+      labels <- lapply(vec_data(breaks), self$trans$format)
+    } else if (is.function(self$labels)) {
+      labels <- lapply(vec_data(breaks), self$labels)
+    } else {
+      labels <- list(self$labels)
+    }
+    lens <- lengths(labels)
+    labels <- lapply(setNames(seq_along(labels), names(labels)), function(i) {
+      c(labels[[i]], rep(NA, max(lens) - lens[[i]]))
+    })
+    labels <- .int$new_data_frame(labels, n = length(breaks))
+
+    if (NROW(labels) != length(breaks)) {
+      abort("Breaks and labels are different lengths")
+    }
+    for (i in seq_len(ncol(labels))) {
+      if (is.list(labels[[i]])) {
+        labels[[i]][vapply(labels[[i]], length, integer(1)) == 0] <- ""
+        labels[[i]] <- lapply(labels[[i]], `[`, 1)
+
+        if (any(vapply(labels[[i]], is.language, logical(1)))) {
+          labels[[i]] <- do.call(expression, labels[[i]])
+        } else {
+          labels[[i]] <- unlist(labels[[i]])
+        }
+      }
+    }
+
+    labels
+  },
   map = function(self, x, limits = self$get_limits()) {
     x <- self$rescale(self$oob(x, range = limits), limits)
 
